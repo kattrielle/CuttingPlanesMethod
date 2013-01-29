@@ -4,6 +4,7 @@ $(document).ready(function() {
     
     var pictures = [];
     var lines = [];
+    var linesNumber = 0;
     var mouseFlag = false;
     
     ClearDrawingArea();
@@ -14,6 +15,7 @@ $(document).ready(function() {
     $("#clearButton").click( ClearDrawingArea );
     $("#addingForm").submit( AddPicture );
     $("#resetButton").click( ResetData );
+    $("#recognizeButton").click( Recognize );
     
     function MouseDrawStart( event )
     {
@@ -64,7 +66,7 @@ $(document).ready(function() {
         for (var i=0; i < pictures.length; i++) {
             if ( pictures[i].name != newPictureName ) {
                 for ( var j=0; j<lines.length; j++) {
-                    if ( pictures[i].lineValues[j] == pictures[newPictureNum].lineValues[j] ) {
+                    if ( pictures[i].lineValues[j].value == pictures[newPictureNum].lineValues[j].value ) {
                         return( [i,newPictureNum] );
                     }
                 }
@@ -95,7 +97,8 @@ $(document).ready(function() {
             res1 = CountValue( pictures[ conflictPoints[0] ].coordinates, coefficients );
             res2 = CountValue( pictures[ conflictPoints[1] ].coordinates, coefficients );
             coefficients.push( Math.random() * (Math.max( res1, res2) - Math.min(res1, res2)) + Math.min( res1, res2));
-            lines.push( coefficients );
+            lines.push( {num: linesNumber, value: coefficients} );
+            linesNumber++;
             //            pictures[ conflictPoints[0] ].lineValues.push( {
             //                num: lines.length - 1, 
             //                value: CountPointSign( pictures[ conflictPoints[0] ].coordinates, coefficients)
@@ -106,11 +109,25 @@ $(document).ready(function() {
             //            } );
             for (var i=0; i< pictures.length; i++) {
                 pictures[i].lineValues.push( {
-                    num: lines.length - 1,
+                    num: linesNumber - 1,
                     value: CountPointSign( pictures[i].coordinates, coefficients)
                 } );
             }
             conflictPoints = IsConflict();
+        }
+    }
+    
+    function RemoveExcessLines()
+    {
+        var i = 0;
+        while ( i < lines.length ) {
+            for (var j=0; j< pictures.length; j++) {
+                for (var k=j+1; k < pictures.length; k++) {
+                    if (pictures[k].name != pictures[j].name) {
+                        
+                    }
+                }
+            }
         }
     }
     
@@ -123,10 +140,19 @@ $(document).ready(function() {
         } );
         var lastPicture = pictures.length - 1;
         for (var i=0; i<lines.length; i++) {
-            pictures[ lastPicture ].lineValues.push( CountPointSign( pictures[lastPicture].coordinates, lines[i] ) );
+            pictures[ lastPicture ].lineValues.push( {
+                num: lines[i].num,
+                value: CountPointSign( pictures[lastPicture].coordinates, lines[i].value ) 
+            });
         }
         UpdateLines();
+        RemoveExcessLines();
         ClearDrawingArea();
+    }
+    
+    function Recognize( )
+    {
+        
     }
     
     function ResetData( )
