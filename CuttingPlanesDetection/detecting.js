@@ -16,6 +16,7 @@ $(document).ready(function() {
     $("#addingForm").submit( AddPicture );
     $("#resetButton").click( ResetData );
     $("#recognizeButton").click( Recognize );
+    $("#updateTableButton").click( RemoveExcess );
     
     function MouseDrawStart( event )
     {
@@ -97,16 +98,11 @@ $(document).ready(function() {
             res1 = CountValue( pictures[ conflictPoints[0] ].coordinates, coefficients );
             res2 = CountValue( pictures[ conflictPoints[1] ].coordinates, coefficients );
             coefficients.push( Math.random() * (Math.max( res1, res2) - Math.min(res1, res2)) + Math.min( res1, res2));
-            lines.push( {num: linesNumber, value: coefficients} );
+            lines.push( {
+                num: linesNumber, 
+                value: coefficients
+            } );
             linesNumber++;
-            //            pictures[ conflictPoints[0] ].lineValues.push( {
-            //                num: lines.length - 1, 
-            //                value: CountPointSign( pictures[ conflictPoints[0] ].coordinates, coefficients)
-            //            } );
-            //            pictures[ conflictPoints[1] ].lineValues.push( {
-            //                num: lines.length - 1, 
-            //                value: CountPointSign( pictures[ conflictPoints[1] ].coordinates, coefficients)
-            //            } );
             for (var i=0; i< pictures.length; i++) {
                 pictures[i].lineValues.push( {
                     num: linesNumber - 1,
@@ -117,18 +113,65 @@ $(document).ready(function() {
         }
     }
     
+    function Compare( picture1, picture2, exeption)
+    {
+        var flag = true;
+        for (var i = 0; i < lines.length; i++) {
+            if (picture1.lineValues[i].num != exeption ) {
+                flag = flag && (picture1.lineValues[i].value == picture2.lineValues[i].value);
+            }
+        }
+        return flag;
+    }
+    
+    function RemoveLine( num )
+    {
+        lines.splice( num, 1 );
+        for (var i = 0; i < pictures.length; i++ ) {
+            pictures[i].lineValues.splice( num, 1 );
+        }
+    }
+    
     function RemoveExcessLines()
     {
         var i = 0;
+        var flag;
         while ( i < lines.length ) {
+            flag = true;
             for (var j=0; j< pictures.length; j++) {
                 for (var k=j+1; k < pictures.length; k++) {
                     if (pictures[k].name != pictures[j].name) {
-                        
+                        flag = flag && !Compare( pictures[k], pictures[j], i );
                     }
+                    
                 }
             }
+            if (!flag) {
+                RemoveLine( i );
+            } else {
+                i++;
+            }
         }
+    }
+    
+    function RemoveExcessExamples()
+    {
+        var i = 0, j;
+        while ( i < pictures.length ) {
+            j = i + 1;
+            while ( j<pictures.length ) {
+                if ( (pictures[i].name == pictures[j].name) && (Compare(pictures[i], pictures[j], linesNumber) ) ) {
+                    pictures.splice( j,1 );
+                } else j++;
+            }
+            i++;
+        }
+    }
+    
+    function RemoveExcess( )
+    {
+        RemoveExcessLines();
+        RemoveExcessExamples();
     }
     
     function AddPicture( )
@@ -146,13 +189,12 @@ $(document).ready(function() {
             });
         }
         UpdateLines();
-        RemoveExcessLines();
         ClearDrawingArea();
     }
     
     function Recognize( )
     {
-        
+        alert("Изображение относится к фигуре ");
     }
     
     function ResetData( )
@@ -178,6 +220,4 @@ $(document).ready(function() {
         return map;
     }
 
-}
-);
-
+});
