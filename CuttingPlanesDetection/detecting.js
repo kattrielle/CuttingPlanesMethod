@@ -168,10 +168,42 @@ $(document).ready(function() {
         }
     }
     
+    function UnsignCompare( picture1, picture2 )
+    {
+        var flag = true;
+        for (var i = 0; i < lines.length; i++) {
+            if (picture1.lineValues[i].insign != 1 ) {
+                flag = flag && (picture1.lineValues[i].value == picture2.lineValues[i].value);
+            }
+        }
+        return flag;
+    }
+    
+    function MakingUnsign( )
+    {
+        var flag;
+        for (var i=0; i < pictures.length; i++) {
+            for (var j = 0; j < lines.length; j++ ) {
+                flag = true;
+                pictures[i].lineValues[j].insign = 1;
+                for (var k = 0; k < pictures; k++) {
+                    if ( pictures[k].name != pictures[i].name ) {
+                        flag = flag && !( UnsignCompare(pictures[i], pictures[j]) );
+                    }
+                }
+                if (!flag) {
+                    pictures[i].lineValues[j].insign = 0;
+                }
+            }
+        }
+    }
+    
     function RemoveExcess( )
     {
         RemoveExcessLines();
         RemoveExcessExamples();
+        MakingUnsign();
+        
     }
     
     function AddPicture( )
@@ -185,7 +217,8 @@ $(document).ready(function() {
         for (var i=0; i<lines.length; i++) {
             pictures[ lastPicture ].lineValues.push( {
                 num: lines[i].num,
-                value: CountPointSign( pictures[lastPicture].coordinates, lines[i].value ) 
+                value: CountPointSign( pictures[lastPicture].coordinates, lines[i].value ),
+                insign: 0
             });
         }
         UpdateLines();
@@ -194,7 +227,19 @@ $(document).ready(function() {
     
     function Recognize( )
     {
-        alert("Изображение относится к фигуре ");
+        
+        var newPicture = { coordinatres: MakingPixelMap(),
+            lineValues: [] }  ;
+        for (var i = 0; i<lines.length; i++ ) {
+            newPicture.lineValues.push( {num: lines[i].num,
+            value: CountPointSign( newPicture.coordinates, lines[i].value ) });
+        }
+        for (var i=0; i<pictures.length; i++) {
+            if ( UnsignCompare( pictures[i], newPicture) ) {
+                alert("Изображение относится к фигуре "+pictures[i].name);
+                return;
+            }
+        }
     }
     
     function ResetData( )
