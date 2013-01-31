@@ -223,6 +223,7 @@ $(document).ready(function() {
         }
         UpdateLines();
         ClearDrawingArea();
+        return false;
     }
     
     function Recognize( )
