@@ -247,8 +247,6 @@ $(document).ready(function() {
         pictures = [];
         lines = [];
         ClearDrawingArea();
-        $("#numberOfClusters").val("");
-        $("#outputDiv").text("");
     }
     
     function MakingPixelMap(  )
